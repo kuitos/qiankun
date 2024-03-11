@@ -150,8 +150,9 @@ export class ScopedCSS {
 
     // handle grouping selector, a,span,p,div { ... }
     cssText = cssText.replace(/^[\s\S]+{/, (selectors) =>
-      selectors.replace(/(^|,\n?)([^,]+)/g, (item, p, s) => {
+      selectors.replace(/(^|,\n?)([^,\[\]]+(?![^\[]*\]))/g, (item, p, s) => {
         // handle div,body,span { ... }
+        // exclude option selector
         if (rootSelectorRE.test(item)) {
           return item.replace(rootSelectorRE, (m) => {
             // do not discard valid previous character, such as body,html or *:not(:root)
