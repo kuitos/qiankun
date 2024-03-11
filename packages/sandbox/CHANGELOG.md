@@ -1,5 +1,14 @@
 # @qiankunjs/sandbox
 
+## 0.0.1-rc.17
+
+### Patch Changes
+
+- 9c56910: feat: support addEventListener with once options to avoid memory leak
+- 6d252c6: chore: optimize code
+- Updated dependencies [ea18ce6]
+  - @qiankunjs/shared@0.0.1-rc.12
+
 ## 0.0.1-rc.16
 
 ### Patch Changes

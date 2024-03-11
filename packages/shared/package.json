@@ -1,6 +1,6 @@
 {
   "name": "@qiankunjs/shared",
-  "version": "0.0.1-rc.11",
+  "version": "0.0.1-rc.12",
   "description": "internal shared package for qiankun",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",

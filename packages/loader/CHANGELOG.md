@@ -1,5 +1,16 @@
 # @qiankunjs/loader
 
+## 0.0.1-rc.20
+
+### Patch Changes
+
+- 7d77699: feat(loader): supports passing Response as entry parameter for loadEntry function
+- Updated dependencies [ea18ce6]
+- Updated dependencies [9c56910]
+- Updated dependencies [6d252c6]
+  - @qiankunjs/shared@0.0.1-rc.12
+  - @qiankunjs/sandbox@0.0.1-rc.17
+
 ## 0.0.1-rc.19
 
 ### Patch Changes

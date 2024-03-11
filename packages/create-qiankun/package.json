@@ -1,6 +1,6 @@
 {
   "name": "create-qiankun",
-  "version": "0.0.1-rc.0",
+  "version": "0.0.1-rc.1",
   "description": "An easy way to start a qiankun project",
   "bin": {
     "create-qiankun": "./dist/index.js"

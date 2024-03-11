@@ -1,5 +1,11 @@
 # @qiankunjs/shared
 
+## 0.0.1-rc.12
+
+### Patch Changes
+
+- ea18ce6: feat(shared): introduce retryable and throwable to fetch-utils
+
 ## 0.0.1-rc.11
 
 ### Patch Changes
