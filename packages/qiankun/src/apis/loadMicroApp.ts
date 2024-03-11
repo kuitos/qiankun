@@ -119,3 +119,26 @@ export function loadMicroApp<T extends ObjectType>(
 
   return microApp;
 }
+
+export function unload(appName: string): Promise<unknown> {
+  const appConfigCaches = Array.from(appConfigPromiseGetterMap.entries()).filter(([key]) => key.startsWith(appName));
+  if (appConfigCaches.length) {
+    return Promise.all(
+      appConfigCaches.map(([key]) => {
+        appConfigPromiseGetterMap.delete(key);
+        const microApps = containerMicroAppsMap.get(key);
+        if (microApps?.length) {
+          containerMicroAppsMap.delete(key);
+          return microApps.map(async (microApp) => {
+            await microApp.unmount();
+            // todo microApp.unload
+          });
+        }
+
+        return;
+      }),
+    );
+  }
+
+  return Promise.resolve();
+}

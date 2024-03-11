@@ -6,7 +6,7 @@ import type { AssetsTranspilerOpts, ScriptTranspilerOpts } from '@qiankunjs/shar
  */
 import { prepareDeferredQueue, warn } from '@qiankunjs/shared';
 import { qiankunHeadTagName } from '../../consts';
-import type { SandboxConfig } from './types';
+import type { SandboxAndSandboxConfig, SandboxConfig } from './types';
 
 const SCRIPT_TAG_NAME = 'SCRIPT';
 const LINK_TAG_NAME = 'LINK';
@@ -121,7 +121,7 @@ export function getStyledElementCSSRules(styledElement: HTMLStyleElement): CSSRu
 
 export function getOverwrittenAppendChildOrInsertBefore(
   nativeFn: typeof HTMLElement.prototype.appendChild | typeof HTMLElement.prototype.insertBefore,
-  getSandboxConfig: (element: HTMLElement) => SandboxConfig | undefined,
+  getSandboxConfig: (element: HTMLElement) => SandboxAndSandboxConfig | undefined,
   target: DynamicDomMutationTarget = 'body',
 ) {
   function appendChildInSandbox<T extends Node>(
@@ -156,7 +156,7 @@ export function getOverwrittenAppendChildOrInsertBefore(
             refNo = Array.from(this.childNodes).indexOf(referenceNode as ChildNode);
           }
 
-          const { sandbox, nodeTransformer, fetch } = sandboxConfig;
+          const { sandbox, nodeTransformer, fetch, dynamicStyleSheetElements } = sandboxConfig;
           const transpiledStyleSheetElement = nodeTransformer(stylesheetElement, {
             fetch,
             sandbox,
@@ -179,7 +179,6 @@ export function getOverwrittenAppendChildOrInsertBefore(
           if (typeof refNo === 'number' && refNo !== -1) {
             defineNonEnumerableProperty(transpiledStyleSheetElement, styleElementRefNodeNo, refNo);
           }
-          const { dynamicStyleSheetElements } = sandboxConfig;
           // record dynamic style elements after insert succeed
           dynamicStyleSheetElements.push(transpiledStyleSheetElement);
 

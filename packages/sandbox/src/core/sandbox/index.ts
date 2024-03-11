@@ -2,7 +2,7 @@
  * @author Kuitos
  * @since 2019-04-11
  */
-import { patchAtBootstrapping, patchAtMounting } from '../../patchers';
+import { disposePatcher, patchAtBootstrapping, patchAtMounting } from '../../patchers';
 import type { SandboxConfig } from '../../patchers/dynamicAppend/types';
 import type { Free, Rebuild } from '../../patchers/types';
 import type { Endowments } from '../membrane';
@@ -90,6 +90,11 @@ export function createSandboxContainer(
       sideEffectsRebuilds = [...bootstrappingFrees, ...mountingFrees].map((free) => free());
 
       sandbox.inactive();
+    },
+
+    async unload() {
+      sandbox.dispose();
+      disposePatcher(sandbox);
     },
   };
 }

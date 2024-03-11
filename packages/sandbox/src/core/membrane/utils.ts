@@ -1,8 +1,97 @@
-import { defineProperty, getOwnPropertyDescriptor, getOwnPropertyNames, hasOwnProperty } from '@qiankunjs/shared';
+import {
+  create,
+  defineProperty,
+  freeze,
+  getOwnPropertyDescriptor,
+  getOwnPropertyNames,
+  hasOwnProperty,
+  keys,
+} from '@qiankunjs/shared';
 import { isBoundedFunction, isCallable, isConstructable } from '../../utils';
+import { globalsInBrowser } from '../globals';
+import { array2TruthyObject } from '../utils';
+import type { Endowments, MembraneTarget } from './index';
+
+export const isPropertyDescriptor = (v: unknown): boolean => {
+  return (
+    typeof v === 'object' &&
+    v !== null &&
+    ['value', 'writable', 'get', 'set', 'configurable', 'enumerable'].some((p) => p in v)
+  );
+};
+
+const cachedGlobalsInBrowser = array2TruthyObject(
+  globalsInBrowser.concat(process.env.NODE_ENV === 'test' ? ['mockNativeWindowFunction'] : []),
+);
+export const isNativeGlobalProp = (prop: string): boolean => {
+  return prop in cachedGlobalsInBrowser;
+};
+
+export function createMembraneTarget(
+  endowments: Endowments = {},
+  incubatorContext: WindowProxy,
+): {
+  target: MembraneTarget;
+  propertiesWithGetter: Map<PropertyKey, boolean>;
+} {
+  // map always has the best performance in `has` check scenario
+  // see https://jsperf.com/array-indexof-vs-set-has/23
+  const propertiesWithGetter = new Map<PropertyKey, boolean>();
+  const target: MembraneTarget = keys(endowments).reduce((acc, key) => {
+    const value = endowments[key];
+    if (isPropertyDescriptor(value)) {
+      defineProperty(acc, key, value);
+    } else {
+      acc[key] = value;
+    }
+    return acc;
+  }, {} as MembraneTarget);
+
+  /*
+   copy the non-configurable property of incubatorContext to membrane target to avoid TypeError
+   see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy/handler/getOwnPropertyDescriptor
+   > A property cannot be reported as non-configurable, if it does not exist as an own property of the target object or if it exists as a configurable own property of the target object.
+   */
+  getOwnPropertyNames(incubatorContext)
+    .filter((p) => {
+      const descriptor = getOwnPropertyDescriptor(incubatorContext, p);
+      return !hasOwnProperty(endowments, p) && !descriptor?.configurable;
+    })
+    .forEach((p) => {
+      const descriptor = getOwnPropertyDescriptor(incubatorContext, p);
+      if (descriptor) {
+        const hasGetter = hasOwnProperty(descriptor, 'get');
+        if (hasGetter) {
+          propertiesWithGetter.set(p, true);
+        }
+
+        defineProperty(
+          target,
+          p,
+          // freeze the descriptor to avoid being modified by zone.js
+          // see https://github.com/angular/zone.js/blob/a5fe09b0fac27ac5df1fa746042f96f05ccb6a00/lib/browser/define-property.ts#L71
+          freeze(descriptor),
+        );
+      }
+    });
+
+  return {
+    target,
+    propertiesWithGetter,
+  };
+}
+
+/**
+ * fastest(at most time) unique array method
+ * @see https://jsperf.com/array-filter-unique/30
+ */
+export function uniq(array: Array<string | symbol>) {
+  return array.filter(function (this: Record<string | symbol, boolean>, element) {
+    return element in this ? false : (this[element] = true);
+  }, create(null));
+}
 
 const functionBoundedValueMap = new WeakMap<CallableFunction, CallableFunction>();
-
 export function rebindTarget2Fn<T>(target: unknown, fn: T, receiver: unknown): T {
   /*
     仅绑定 isCallable && !isBoundedFunction && !isConstructable 的函数对象，如 window.console、window.atob 这类，不然微应用中调用时会抛出 Illegal invocation 异常

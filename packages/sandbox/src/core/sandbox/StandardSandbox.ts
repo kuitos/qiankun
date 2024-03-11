@@ -18,11 +18,11 @@ export class StandardSandbox extends Compartment implements Sandbox {
   readonly name: string;
 
   constructor(name: string, globals: Endowments, incubatorContext: WindowProxy = window) {
-    const getRealmGlobal = () => realmGlobal;
+    const getRealmGlobal = () => realmContext;
     const getTopValue = (p: 'top' | 'parent'): WindowProxy => {
       // if your master app in an iframe context, allow these props escape the sandbox
       if (incubatorContext === incubatorContext.parent) {
-        return realmGlobal;
+        return realmContext;
       }
       return incubatorContext[p]!;
     };
@@ -38,7 +38,7 @@ export class StandardSandbox extends Compartment implements Sandbox {
       hasOwnProperty: {
         value: function hasOwnPropertyImpl(this: unknown, key: PropertyKey): boolean {
           // calling from hasOwnProperty.call(obj, key)
-          if (this !== realmGlobal && this !== null && typeof this === 'object') {
+          if (this !== realmContext && this !== null && typeof this === 'object') {
             return hasOwnProperty(this, key);
           }
 
@@ -84,9 +84,9 @@ export class StandardSandbox extends Compartment implements Sandbox {
       endowments: { ...intrinsics, ...globals },
     });
 
-    const { realmGlobal, target } = membrane;
+    const { realmContext, target } = membrane;
 
-    super(realmGlobal);
+    super(realmContext);
 
     this.name = name;
     this.membrane = membrane;
@@ -115,9 +115,4 @@ export class StandardSandbox extends Compartment implements Sandbox {
 
     this.membrane.lock();
   }
-
-  // TODO
-  // destroy() {
-  //
-  // }
 }

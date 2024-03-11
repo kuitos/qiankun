@@ -10,6 +10,10 @@ export enum SandboxType {
   Snapshot = 'Snapshot',
 }
 
+export interface Disposable {
+  dispose(): void;
+}
+
 export interface Sandbox extends Compartment {
   name: string;
   type: SandboxType;

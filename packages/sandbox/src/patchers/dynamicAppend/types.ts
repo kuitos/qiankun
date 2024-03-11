@@ -2,14 +2,14 @@
  * @author Kuitos
  * @since 2023-05-04
  */
-import type { BaseLoaderOpts, NodeTransformer } from '@qiankunjs/shared';
-import type { Deferred } from '@qiankunjs/shared';
-import type { Sandbox } from '../../core/sandbox';
+import type { Sandbox } from '@qiankunjs/sandbox';
+import type { BaseLoaderOpts, Deferred, NodeTransformer } from '@qiankunjs/shared';
 
 export type SandboxConfig = {
   appName: string;
-  sandbox: Sandbox;
   dynamicStyleSheetElements: Array<HTMLStyleElement | HTMLLinkElement>;
   dynamicExternalSyncScriptDeferredList: Array<Deferred<void>>;
   nodeTransformer: NodeTransformer;
 } & BaseLoaderOpts;
+
+export type SandboxAndSandboxConfig = { sandbox: Sandbox } & SandboxConfig;

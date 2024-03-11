@@ -22,7 +22,7 @@ import {
   styleElementRefNodeNo,
   styleElementTargetSymbol,
 } from './common';
-import type { SandboxConfig } from './types';
+import type { SandboxAndSandboxConfig, SandboxConfig } from './types';
 
 const elementAttachedSymbol = Symbol('attachedApp');
 declare global {
@@ -50,10 +50,10 @@ Object.defineProperty(nativeGlobal, '__currentLockingSandbox__', {
 
 const sandboxConfigWeakMap = new WeakMap<Sandbox, SandboxConfig>();
 
-const elementAttachSandboxConfigMap = new WeakMap<HTMLElement, SandboxConfig>();
+const elementAttachSandboxAndConfigMap = new WeakMap<HTMLElement, SandboxAndSandboxConfig>();
 const patchCacheWeakMap = new WeakMap<object, unknown>();
 
-const getSandboxConfig = (element: HTMLElement) => elementAttachSandboxConfigMap.get(element);
+const getSandboxConfig = (element: HTMLElement) => elementAttachSandboxAndConfigMap.get(element);
 
 function patchDocument(sandbox: Sandbox, getContainer: () => HTMLElement): CallableFunction {
   const container = getContainer();
@@ -68,7 +68,7 @@ function patchDocument(sandbox: Sandbox, getContainer: () => HTMLElement): Calla
   const attachElementToSandbox = (element: HTMLElement) => {
     const sandboxConfig = sandboxConfigWeakMap.get(sandbox);
     if (sandboxConfig) {
-      elementAttachSandboxConfigMap.set(element, sandboxConfig);
+      elementAttachSandboxAndConfigMap.set(element, { ...sandboxConfig, sandbox });
     }
   };
   const getDocumentHeadElement = () => {
@@ -320,7 +320,6 @@ export function patchStandardSandbox(
   if (!sandboxConfig) {
     sandboxConfig = {
       appName,
-      sandbox,
       fetch,
       nodeTransformer,
       dynamicStyleSheetElements: [],
@@ -408,4 +407,11 @@ export function patchStandardSandbox(
       );
     };
   };
+}
+
+export function disposeStandardSandbox(sandbox: Sandbox) {
+  const sandboxConfig = sandboxConfigWeakMap.get(sandbox);
+  sandboxConfig?.dynamicStyleSheetElements.splice(0);
+  sandboxConfig?.dynamicExternalSyncScriptDeferredList.splice(0);
+  sandboxConfigWeakMap.delete(sandbox);
 }

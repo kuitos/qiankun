@@ -6,6 +6,7 @@
 // }
 
 import { nativeGlobal } from '../../consts';
+import type { Disposable } from '../sandbox/types';
 
 const compartmentGlobalIdPrefix = '__compartment_globalThis__';
 const compartmentGlobalIdSuffix = '__';
@@ -21,7 +22,7 @@ declare global {
 
 let compartmentCounter = 0;
 
-export class Compartment {
+export class Compartment implements Disposable {
   /**
    * Since the time of execution of the code in Compartment is determined by the browser, a unique compartmentSpecifier should be generated in Compartment
    */
@@ -59,6 +60,10 @@ export class Compartment {
 
     // eslint-disable-next-line max-len
     return `;(function(){with(this){${globalObjectOptimizer}${source}\n${sourceMapURL}}}).bind(window.${this.id})();`;
+  }
+
+  dispose() {
+    delete nativeGlobal[this.id];
   }
 
   // TODO add return value
