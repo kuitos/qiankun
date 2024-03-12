@@ -181,6 +181,37 @@ export function recordStyledComponentsCSSRules(styleElements: HTMLStyleElement[]
      */
     if (styleElement instanceof HTMLStyleElement && isStyledComponentsLike(styleElement)) {
       if (styleElement.sheet) {
+        if (!styledComponentCSSRulesMap.has(styleElement)) {
+          const originSheet = styleElement.sheet;
+
+          (['insertRule', 'deleteRule'] as const).forEach((key) => {
+            const originSheetFn = originSheet[key];
+
+            originSheet[key] = function resetSheetFn(...args: any[]) {
+              if (styleElement.sheet?.[key] && styleElement.sheet[key] !== resetSheetFn) {
+                // @ts-ignore
+                return styleElement.sheet[key].call(styleElement.sheet, ...args);
+              } else {
+                // @ts-ignore
+                return originSheetFn.call(originSheet, ...args);
+              }
+            };
+          });
+
+          (['cssRules'] as const).forEach((key) => {
+            const originSheetElement = originSheet[key];
+
+            Object.defineProperty(originSheet, key, {
+              get() {
+                if (styleElement.sheet && styleElement.sheet !== originSheet) {
+                  return styleElement.sheet[key];
+                } else {
+                  return originSheetElement;
+                }
+              },
+            });
+          });
+        }
         // record the original css rules of the style element for restore
         styledComponentCSSRulesMap.set(styleElement, (styleElement.sheet as CSSStyleSheet).cssRules);
       }
