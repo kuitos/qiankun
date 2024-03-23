@@ -45,7 +45,7 @@ describe('forStrictSandbox test', () => {
       active: noop,
       inactive: noop,
     };
-    patchStrictSandbox(appName, () => wrapper, sandbox, true, false, undefined, true);
+    patchStrictSandbox(appName, () => wrapper, sandbox, true, false, true, undefined, true);
 
     expect(patchedDocument).toBeDefined();
     expect(() => patchedDocument?.createTreeWalker(patchedDocument)).not.toThrow();

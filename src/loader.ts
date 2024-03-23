@@ -25,6 +25,7 @@ import {
   getContainer,
   getDefaultTplWrapper,
   getWrapperId,
+  isEnableProxyStyle,
   isEnableScopedCSS,
   performanceGetEntriesByName,
   performanceMark,
@@ -285,6 +286,7 @@ export async function loadApp<T extends ObjectType>(
   }
 
   const scopedCSS = isEnableScopedCSS(sandbox);
+  const proxyCSS = isEnableProxyStyle(sandbox);
   let initialAppWrapperElement: HTMLElement | null = createElement(
     appContent,
     strictStyleIsolation,
@@ -322,6 +324,7 @@ export async function loadApp<T extends ObjectType>(
       // FIXME should use a strict sandbox logic while remount, see https://github.com/umijs/qiankun/issues/518
       initialAppWrapperGetter,
       scopedCSS,
+      proxyCSS,
       useLooseSandbox,
       excludeAssetFilter,
       global,

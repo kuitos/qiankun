@@ -30,6 +30,7 @@ export function patchLooseSandbox(
   sandbox: SandBox,
   mounting = true,
   scopedCSS = false,
+  proxyCSS = true,
   excludeAssetFilter?: CallableFunction,
 ): Freer {
   const { proxy } = sandbox;
@@ -53,6 +54,7 @@ export function patchLooseSandbox(
       strictGlobal: false,
       speedySandbox: false,
       scopedCSS,
+      proxyCSS,
       dynamicStyleSheetElements,
       excludeAssetFilter,
     }),

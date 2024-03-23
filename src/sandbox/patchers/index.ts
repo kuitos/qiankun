@@ -16,6 +16,7 @@ export function patchAtMounting(
   elementGetter: () => HTMLElement | ShadowRoot,
   sandbox: SandBox,
   scopedCSS: boolean,
+  proxyCSS: boolean,
   excludeAssetFilter?: CallableFunction,
   speedySandBox?: boolean,
 ): Freer[] {
@@ -28,15 +29,25 @@ export function patchAtMounting(
   const patchersInSandbox = {
     [SandBoxType.LegacyProxy]: [
       ...basePatchers,
-      () => patchLooseSandbox(appName, elementGetter, sandbox, true, scopedCSS, excludeAssetFilter),
+      () => patchLooseSandbox(appName, elementGetter, sandbox, true, scopedCSS, proxyCSS, excludeAssetFilter),
     ],
     [SandBoxType.Proxy]: [
       ...basePatchers,
-      () => patchStrictSandbox(appName, elementGetter, sandbox, true, scopedCSS, excludeAssetFilter, speedySandBox),
+      () =>
+        patchStrictSandbox(
+          appName,
+          elementGetter,
+          sandbox,
+          true,
+          scopedCSS,
+          proxyCSS,
+          excludeAssetFilter,
+          speedySandBox,
+        ),
     ],
     [SandBoxType.Snapshot]: [
       ...basePatchers,
-      () => patchLooseSandbox(appName, elementGetter, sandbox, true, scopedCSS, excludeAssetFilter),
+      () => patchLooseSandbox(appName, elementGetter, sandbox, true, scopedCSS, proxyCSS, excludeAssetFilter),
     ],
   };
 
@@ -48,18 +59,29 @@ export function patchAtBootstrapping(
   elementGetter: () => HTMLElement | ShadowRoot,
   sandbox: SandBox,
   scopedCSS: boolean,
+  proxyCSS: boolean,
   excludeAssetFilter?: CallableFunction,
   speedySandBox?: boolean,
 ): Freer[] {
   const patchersInSandbox = {
     [SandBoxType.LegacyProxy]: [
-      () => patchLooseSandbox(appName, elementGetter, sandbox, false, scopedCSS, excludeAssetFilter),
+      () => patchLooseSandbox(appName, elementGetter, sandbox, false, scopedCSS, proxyCSS, excludeAssetFilter),
     ],
     [SandBoxType.Proxy]: [
-      () => patchStrictSandbox(appName, elementGetter, sandbox, false, scopedCSS, excludeAssetFilter, speedySandBox),
+      () =>
+        patchStrictSandbox(
+          appName,
+          elementGetter,
+          sandbox,
+          false,
+          scopedCSS,
+          proxyCSS,
+          excludeAssetFilter,
+          speedySandBox,
+        ),
     ],
     [SandBoxType.Snapshot]: [
-      () => patchLooseSandbox(appName, elementGetter, sandbox, false, scopedCSS, excludeAssetFilter),
+      () => patchLooseSandbox(appName, elementGetter, sandbox, false, scopedCSS, proxyCSS, excludeAssetFilter),
     ],
   };
 

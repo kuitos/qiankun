@@ -259,6 +259,18 @@ export function isEnableScopedCSS(sandbox: FrameworkConfiguration['sandbox']) {
   return !!sandbox.experimentalStyleIsolation;
 }
 
+export function isEnableProxyStyle(sandbox: FrameworkConfiguration['sandbox']) {
+  if (typeof sandbox !== 'object') {
+    return false;
+  }
+
+  if (sandbox.strictStyleIsolation) {
+    return false;
+  }
+
+  return true;
+}
+
 /**
  * copy from https://developer.mozilla.org/zh-CN/docs/Using_XPath
  * @param el

@@ -200,6 +200,7 @@ export type ContainerConfig = {
   dynamicStyleSheetElements: Array<HTMLStyleElement | HTMLLinkElement>;
   appWrapperGetter: CallableFunction;
   scopedCSS: boolean;
+  proxyCSS: boolean;
   excludeAssetFilter?: CallableFunction;
 };
 
@@ -230,6 +231,7 @@ function getOverwrittenAppendChildOrInsertBefore(opts: {
         speedySandbox,
         dynamicStyleSheetElements,
         scopedCSS,
+        proxyCSS,
         excludeAssetFilter,
       } = containerConfig;
 
@@ -265,6 +267,20 @@ function getOverwrittenAppendChildOrInsertBefore(opts: {
               dynamicLinkAttachedInlineStyleMap.set(element, stylesheetElement);
             } else {
               css.process(appWrapper, stylesheetElement, appName);
+            }
+          } else if (proxyCSS) {
+            // exclude link elements like <link rel="icon" href="favicon.ico">
+            const linkElementUsingStylesheet =
+              element.tagName?.toUpperCase() === LINK_TAG_NAME &&
+              (element as HTMLLinkElement).rel === 'stylesheet' &&
+              (element as HTMLLinkElement).href;
+            if (linkElementUsingStylesheet) {
+              const fetch =
+                typeof frameworkConfiguration.fetch === 'function'
+                  ? frameworkConfiguration.fetch
+                  : frameworkConfiguration.fetch?.fn;
+              stylesheetElement = convertLinkAsStyle(element, () => {}, fetch);
+              dynamicLinkAttachedInlineStyleMap.set(element, stylesheetElement);
             }
           }
 

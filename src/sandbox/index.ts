@@ -35,6 +35,7 @@ export function createSandboxContainer(
   appName: string,
   elementGetter: () => HTMLElement | ShadowRoot,
   scopedCSS: boolean,
+  proxyCSS: boolean,
   useLooseSandbox?: boolean,
   excludeAssetFilter?: (url: string) => boolean,
   globalContext?: typeof window,
@@ -55,6 +56,7 @@ export function createSandboxContainer(
     elementGetter,
     sandbox,
     scopedCSS,
+    proxyCSS,
     excludeAssetFilter,
     speedySandBox,
   );
@@ -87,7 +89,15 @@ export function createSandboxContainer(
 
       /* ------------------------------------------ 2. 开启全局变量补丁 ------------------------------------------*/
       // render 沙箱启动时开始劫持各类全局监听，尽量不要在应用初始化阶段有 事件监听/定时器 等副作用
-      mountingFreers = patchAtMounting(appName, elementGetter, sandbox, scopedCSS, excludeAssetFilter, speedySandBox);
+      mountingFreers = patchAtMounting(
+        appName,
+        elementGetter,
+        sandbox,
+        scopedCSS,
+        proxyCSS,
+        excludeAssetFilter,
+        speedySandBox,
+      );
 
       /* ------------------------------------------ 3. 重置一些初始化时的副作用 ------------------------------------------*/
       // 存在 rebuilder 则表明有些副作用需要重建
