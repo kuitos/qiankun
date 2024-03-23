@@ -87,6 +87,13 @@ export function registerMicroApps<T extends ObjectType>(
       customProps: props,
     });
   });
+  
+  // only show same name warn info 
+  apps.forEach((app) => {
+    if (microApps.some((registeredApp) => registeredApp.name === app.name)) {
+      console.warn(`Each app only needs to be registered once by ${app.name}`);
+    }
+  });
 }
 
 const appConfigPromiseGetterMap = new Map<string, Promise<ParcelConfigObjectGetter>>();
