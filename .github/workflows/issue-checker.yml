@@ -18,16 +18,26 @@ jobs:
   log-conditions:
     runs-on: ubuntu-latest
     needs: check-permission
+    env:
+      ISSUE_TITLE: ${{ github.event.issue.title }}
+      ISSUE_BODY: ${{ github.event.issue.body }}
+      ISSUE_STATE: ${{ github.event.issue.state }}
+      REQUIRE_RESULT: ${{ needs.check-permission.outputs.require-result }}
     steps:
-      - run: echo "needs.check-permission.outputs.require-result = ${{ needs.check-permission.outputs.require-result }}"
-      - run: echo "github.event.issue.state = ${{ github.event.issue.state }}"
-      - run: echo "contains(github.event.issue.title, '[Feature Request]') = ${{ contains(github.event.issue.title, '[Feature Request]') }}"
-      - run: echo "contains(github.event.issue.body, 'https://github.com') = ${{ contains(github.event.issue.body, 'https://github.com') }}"
+      - run: echo "require-result = $REQUIRE_RESULT"
+      - run: echo "issue state = $ISSUE_STATE"
+      - run: echo "contains '[Feature Request]' in title: ${{ contains(env.ISSUE_TITLE, '[Feature Request]') }}"
+      - run: echo "contains 'https://github.com' in body: ${{ contains(env.ISSUE_BODY, 'https://github.com') }}"
 
   check-open:
     runs-on: ubuntu-latest
     needs: check-permission
-    if: needs.check-permission.outputs.require-result == 'false' && github.event.issue.state == 'open' && contains(github.event.issue.title, '[Feature Request]') == false && contains(github.event.issue.body, 'https://github.com') == false && contains(github.event.issue.body, 'https://stackblitz.com') == false && contains(github.event.issue.body, 'https://codesandbox.io') == false
+    env:
+      ISSUE_TITLE: ${{ github.event.issue.title }}
+      ISSUE_BODY: ${{ github.event.issue.body }}
+      ISSUE_STATE: ${{ github.event.issue.state }}
+      REQUIRE_RESULT: ${{ needs.check-permission.outputs.require-result }}
+    if: env.REQUIRE_RESULT == 'false' && env.ISSUE_STATE == 'open' && contains(env.ISSUE_TITLE, '[Feature Request]') == false && contains(env.ISSUE_BODY, 'https://github.com') == false && contains(env.ISSUE_BODY, 'https://stackblitz.com') == false && contains(env.ISSUE_BODY, 'https://codesandbox.io') == false
     steps:
       - uses: actions-cool/maintain-one-comment@v3
         with:
@@ -39,7 +49,11 @@ jobs:
   check-close:
     runs-on: ubuntu-latest
     needs: check-permission
-    if: needs.check-permission.outputs.require-result == 'false' && github.event.issue.state == 'closed' && (contains(github.event.issue.body, 'https://github.com') == true || contains(github.event.issue.body, 'https://stackblitz.com') == true || contains(github.event.issue.body, 'https://codesandbox.io') == true)
+    env:
+      ISSUE_BODY: ${{ github.event.issue.body }}
+      ISSUE_STATE: ${{ github.event.issue.state }}
+      REQUIRE_RESULT: ${{ needs.check-permission.outputs.require-result }}
+    if: env.REQUIRE_RESULT == 'false' && env.ISSUE_STATE == 'closed' && (contains(env.ISSUE_BODY, 'https://github.com') == true || contains(env.ISSUE_BODY, 'https://stackblitz.com') == true || contains(env.ISSUE_BODY, 'https://codesandbox.io') == true)
     steps:
       - uses: actions-cool/issues-helper@v3
         with:
